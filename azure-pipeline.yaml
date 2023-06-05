@@ -1,0 +1,195 @@
+name: $(Build.DefinitionName)_1.0.$(year:yy)$(DayOfYear)$(Rev:.r)
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - test.rest
+pool:
+  name: Azure Pipelines
+variables:
+  azureResourceManagerConnection: '$(variables.azureResourceManagerConnection)'
+
+stages:
+- stage: Build 
+  jobs:
+  - job: Build 
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - script: md AzureDeployFiles
+      displayName: create output directory
+      workingDirectory: $(System.DefaultWorkingDirectory)
+
+    - task: AzureCLI@2
+      displayName: 'Azure CLI '
+      inputs:
+        azureSubscription: '$(azureResourceManagerConnection)'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: 'az bicep build --file azuredeployBase.bicep --outdir $(System.DefaultWorkingDirectory)/AzureDeployFiles'
+
+    - task: CopyFiles@2
+      displayName: 'Copy ARM Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/AzureDeployFiles'
+        Contents: azuredeployBase.json
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: true
+
+    - task: AzureCLI@2
+      displayName: 'Azure CLI '
+      inputs:
+        azureSubscription: '$(azureResourceManagerConnection)'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: 'az bicep build --file appconfig_staticvalues.bicep --outdir $(System.DefaultWorkingDirectory)/AzureDeployFiles'
+
+    - task: CopyFiles@2
+      displayName: 'Copy ARM Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/AzureDeployFiles'
+        Contents: appconfig_staticvalues.json
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: false
+
+    - task: AzureCLI@2
+      displayName: 'Azure CLI '
+      inputs:
+        azureSubscription: '$(azureResourceManagerConnection)'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: 'az bicep build --file azuredeployFunctionApps.bicep --outdir $(System.DefaultWorkingDirectory)/AzureDeployFiles'
+
+    - task: CopyFiles@2
+      displayName: 'Copy ARM Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/AzureDeployFiles'
+        Contents: azuredeployFunctionApps.json
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: false
+
+    - task: AzureCLI@2
+      displayName: 'Azure CLI '
+      inputs:
+        azureSubscription: '$(azureResourceManagerConnection)'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: 'az bicep build --file azuredeployLogicAppsStd.bicep --outdir $(System.DefaultWorkingDirectory)/AzureDeployFiles'
+
+    - task: CopyFiles@2
+      displayName: 'Copy ARM Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/AzureDeployFiles'
+        Contents: azuredeployLogicAppsStd.json
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: false
+
+    - task: AzureCLI@2
+      displayName: 'Azure CLI '
+      inputs:
+        azureSubscription: '$(azureResourceManagerConnection)'
+        scriptType: ps
+        scriptLocation: inlineScript
+        inlineScript: 'az bicep build --file azuredeployLogicAppsConsumption.bicep --outdir $(System.DefaultWorkingDirectory)/AzureDeployFiles'
+
+    - task: CopyFiles@2
+      displayName: 'Copy ARM Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/AzureDeployFiles'
+        Contents: azuredeployLogicAppsConsumption.json
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        CleanTargetFolder: false
+
+    # - task: CopyFiles@2
+    #   displayName: 'Copy APIM Policy Files to: $(Build.ArtifactStagingDirectory)'
+    #   inputs:
+    #     SourceFolder: '$(System.DefaultWorkingDirectory)/EDI/APIMPolicies'
+    #     Contents: '*'
+    #     TargetFolder: '$(Build.ArtifactStagingDirectory)/APIMPolicies'
+    #     CleanTargetFolder: false
+
+    - task: CopyFiles@2
+      displayName: 'Copy PowerShell Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '*.ps1'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/PowerShell'
+        CleanTargetFolder: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: AppConfigTalk'
+      inputs:
+        ArtifactName: AppConfigTalk
+
+    - task: CopyFiles@2
+      displayName: 'Create project folder'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/LogicAppsStd/Demo1'
+        Contents: |
+          **
+          !.funcignore
+          !.debug
+          !.git*
+          !.vscode/**/*
+          !__azurite_db*__.json
+          !__blobstorage__
+          !__queuestorage__
+          !local.settings.json
+          !test
+          !workflow-designtime/**/*
+        TargetFolder: 'LogicAppStdFiles'
+        CleanTargetFolder: true
+
+    - task: ArchiveFiles@2
+      displayName: 'Create project zip'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/LogicAppStdFiles'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: LogicAppsStd'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        ArtifactName: LogicAppsStd
+
+    # - task: UseDotNet@2
+    #   displayName: 'Install .NET Core SDK'
+    #   inputs:
+    #     version: 6.x
+    #     performMultiLevelLookup: true
+    #     includePreviewVersions: false # Required for preview versions
+
+    - task: DotNetCoreCLI@2
+      displayName: "Function App InProcess"
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: 'FunctionApps/Inprocess/InProcess.csproj'
+        arguments: --output $(Build.ArtifactStagingDirectory)/FunctionAppInprocess
+        zipAfterPublish: true
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: FunctionAppInprocess'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/FunctionAppInprocess'
+        ArtifactName: FunctionAppInprocess
+    
+    - task: DotNetCoreCLI@2
+      displayName: "Function App Isolated"
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: 'FunctionApps/Isolated/Isolated.csproj'
+        arguments: --output $(Build.ArtifactStagingDirectory)/FunctionAppIsolated
+        zipAfterPublish: true
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: FunctionAppIsolated'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/FunctionAppIsolated'
+        ArtifactName: FunctionAppIsolated

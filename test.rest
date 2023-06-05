@@ -1,0 +1,38 @@
+POST https://prod-07.uksouth.logic.azure.com:443/workflows/f4308d6fe2db4a30972fd7fccad2dbb5/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eGqEQ5qbh5lh7UD7iKKk2PpVLXiLXIR7Nbm06-Ge2H4
+
+###
+
+POST https://prod-11.uksouth.logic.azure.com:443/workflows/76508e50740546ecb5ddaf2076a30779/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=vSa_X-3ElRLAb5rh-j2cgXwroP9RXm1xyH1s03lBXcA
+
+###
+
+POST https://logic-std-demo1-appconfigtalk-demo.azurewebsites.net:443/api/Demo1a/triggers/When_a_HTTP_request_is_received/invoke?api-version=2022-05-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=udGf8Y-olpeYCAzxMH3N5SnsFka3BSU9bGOzb2eFo0c
+
+###
+POST https://logic-std-demo1-appconfigtalk-demo.azurewebsites.net:443/api/Demo1b/triggers/When_a_HTTP_request_is_received/invoke?api-version=2022-05-01&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=w6My-YGOXQX7gBMptsQvJNWRpK077A2pdFMM85DiayI
+
+###
+
+POST https://func-inprocess-appconfigtalk-demo.azurewebsites.net/api/Demo1a?code=-sRcLxoBC7ru0Y6ytxScirr1mXUJJhW5h03-0Y7lzRRuAzFuI6UFnA==
+
+###
+POST https://func-inprocess-appconfigtalk-demo.azurewebsites.net/api/Demo1b?code=ZNsIkxTDViZPMBmHcsJ9n825-7muTiEIpqJEN_iul1DuAzFu8ClZSg==
+
+###
+POST https://func-inprocess-appconfigtalk-demo.azurewebsites.net/api/Demo1c?code=mh4icK78Q8RrALJXYLGIXwawrRVuaLgyp-JkAoOF73axAzFuYD6-nw==
+
+###
+
+POST https://func-isolated-appconfigtalk-demo.azurewebsites.net/api/Demo2a?code=aoPVXhXhnQNgoe1J4JdQSB31LTNzpZOtlX7UDMB3wu42AzFu9S0XyA==
+
+###
+POST https://func-isolated-appconfigtalk-demo.azurewebsites.net/api/Demo2b?code=f0LfgrYqAd1a8jkCfez9zu1NXJyFZsTXrXvhin_2h56rAzFur5V7kA==
+
+###
+POST https://func-isolated-appconfigtalk-demo.azurewebsites.net/api/Demo2c?code=8FUf8ucKrxNRdjFyZ0VShqFd4XDQoKHU1M7RjalsGwRTAzFueXMaLQ==
+
+###
+
+POST http://localhost:7071/api/Demo2a
+
+###

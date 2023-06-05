@@ -1,0 +1,79 @@
+            "AppConfigURL": {
+              "defaultValue": "[concat('https://',parameters('appconfig-name'),'.azconfig.io')]",
+              "type": "String"
+            },
+            "AppConfigEnvironment": {
+              "defaultValue": "[parameters('EnvironmentShortName')]",
+              "type": "String"
+            },
+
+
+                "Get_D365-TenantId": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "@parameters('AppConfigURL')",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "queries": {
+                      "api-version": "1.0",
+                      "label": "@parameters('AppConfigEnvironment')"
+                    },
+                    "uri": "@{parameters('AppConfigURL')}/kv/D365-TenantId"
+                  },
+                  "runAfter": {
+                    "Get_D365-ClientId": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http"
+                },
+
+
+                "Parse_JSON_D365-ClientSecret_KVURI": {
+                  "inputs": {
+                    "content": "@body('Get_D365-ClientSecret')?['value']",
+                    "schema": {
+                      "properties": {
+                        "uri": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_D365-ClientSecret": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson"
+                }
+
+                "Get_D365-ClientSecret_from_KV": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "queries": {
+                      "api-version": "2016-10-01"
+                    },
+                    "uri": "@body('Parse_JSON_D365-ClientSecret_KVURI')?['uri']"
+                  },
+                  "runAfter": {
+                    "Parse_JSON_D365-ClientSecret_KVURI": [
+                      "Succeeded"
+                    ]
+                  },
+                  "runtimeConfiguration": {
+                    "secureData": {
+                      "properties": [
+                        "outputs"
+                      ]
+                    }
+                  },
+                  "type": "Http"
+                }
+

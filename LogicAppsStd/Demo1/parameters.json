@@ -1,0 +1,10 @@
+{
+  "testvalue1": {
+    "type": "String",
+    "value": "@APPSETTING('testvalue1')"
+  },
+  "testvalue2": {
+    "type": "String",
+    "value": "@APPSETTING('testvalue2')"
+  }
+}
